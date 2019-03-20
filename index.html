@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script>
+        var html = document.documentElement;
+        var hW = html.getBoundingClientRect().width;
+        html.style.fontSize = hW/15+'px';
+        // 阻止pc端事件
+        document.addEventListener('touchstart',function (ev) {
+            ev.preventDefault();
+        },{passive:false})
+    </script>
+    <style>
+        /* cssReset */
+        body{
+            margin: 0;
+            font-family:Helvetica;
+            -webkit-user-select: none;
+            -webkit-text-size-adjust: 100%;
+        }
+        input,button{
+            -webkit-appearance: none;
+            border-radius: none;
+        }
+        input,a,button{
+            -webkit-tap-highlight-color:rgba(0,0,0,0)
+        }
+        /* css */
+        .wrap{
+            height: 4.69rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .list{
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            width: 400%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .list li{
+            float: left;
+            width: 15rem;
+        }
+        .wrap .active{
+            background: #fff;
+        }
+        .list img{
+            width: 15rem;
+            display: block;
+        }
+        .wrap nav{
+            width: 100%;
+            height: 15px;
+            position: absolute;
+            left: 0;
+            bottom: 0.1rem;
+            text-align: center;
+        }
+        .wrap nav a{
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            border-radius: 50%;
+            background-color: #f00;
+            margin: 0 5px;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+    <section class="wrap">
+        <ul class="list">
+            <li><a href="#"><img src="./img/img1.jpg" alt=""></a></li>
+            <li><a href="#"><img src="./img/img2.jpg" alt=""></a></li>
+            <li><a href="#"><img src="./img/img3.jpg" alt=""></a></li>
+            <li><a href="#"><img src="./img/img4.jpg" alt=""></a></li>
+        </ul>
+        <nav>
+            <a class="active" href="javascript:;"></a>
+            <a href="javascript:;"></a>
+            <a href="javascript:;"></a>
+            <a href="javascript:;"></a>
+        </nav>
+    </section>
+    <script>
+        // 获取元素
+        var oWrap = document.querySelector('.wrap');
+        var oList = document.querySelector('.list');
+        var oA = document.querySelectorAll('nav a');
+        var disX = 0;//手指按下的横坐标
+        var listL = 0;//当前按下去的时候ul的left值
+        var w = oWrap.clientWidth;//获取元素内容宽度
+        var len = 0;//表示ul中li的个数
+        var n=0;//表示获得焦点的小圆点
+
+        oList.innerHTML+=oList.innerHTML;//复制ul中的数据，又放进ul中
+        len = oList.children.length;//li的个数
+        oList.style.width = len*w+'px';//重置ul的宽度
+        // 给oList注册手指按下事件
+        oList.addEventListener('touchstart',start);
+        oList.addEventListener('touchmove',move);
+        oList.addEventListener('touchend',end);
+        function start(ev) {
+            var e = ev.changedTouches[0];//找到涉及当前事件的手指列表中的第0个手指
+            disX = e.pageX;//ev.pageX返回鼠标指针的位置相对于文档左边缘的距离
+            oList.style.transition = 'none';//把list的transition干掉
+            //当手指按下去的时候，要知道当前点击的是第几张图，
+            // 如果是第一张图就快速拉到第5张图的位置
+            var num = Math.round(this.offsetLeft/w);//如果是0.就是第一张图
+            if(num==0){
+                num=oA.length;//a元素的长度正好是第五张图的下标
+                oList.style.left = -num * w+'px';
+            }
+            //如果是最后一张图，就把图片拉到第四张
+            if(-num==len-1){//最后一张图
+                num = oA.length-1;//下标为3的li其实就是第四个li
+                oList.style.left = -num*w+'px';
+            }
+            listL = this.offsetLeft;
+        }
+        function move(ev) {
+            var e = ev.changedTouches[0];
+            //当手指滑动的时候，动态修改ul的值
+            oList.style.left=e.pageX-disX+listL+'px';
+        }
+        function end() {
+            //当前olist的offsetLeft值，除以可视区域的宽度，得出来的数据四舍五入
+            var num = Math.round(this.offsetLeft/w);
+            oList.style.transition = '.5s';
+            oList.style.left = num*w+'px';
+            oA[n].className = '';//把最开始a元素上的active清空
+            oA[-num%oA.length].className='active';
+            n=-num%oA.length//把当前的a元素下标赋值给n，那么下一次清空的就是当前的a
+        }
+    </script>
+</body>
+</html>
